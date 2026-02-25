@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Revista</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #flipbook {
+      width: 90vw;
+      height: 90vh;
+    }
+    #flipbook .page {
+      background: #fff;
+    }
+    #flipbook img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  </style>
+
+  <!-- jQuery (requerido por Turn.js) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <!-- Turn.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+</head>
+<body>
+
+<div id="flipbook">
+  <div class="page"><img src="Imagenes/Boletin1.jpg"></div>
+ <div class="page"><img src="Imagenes/Boletin2.jpg"></div>
+ <div class="page"><img src="Imagenes/Boletin3.jpg"></div>
+ <div class="page"><img src="Imagenes/Boletin4.jpg"></div>
+  <!-- duplica según número de páginas -->
+</div>
+
+<script>
+  $('#flipbook').turn({
+    width: '100%',
+    height: '100%',
+    autoCenter: true,
+    display: 'double',
+    gradients: true,
+    acceleration: true
+  });
+</script>
+
+</body>
+</html>
