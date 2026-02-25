@@ -26,34 +26,46 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
     }
   </style>
 
   <!-- jQuery (Turn.js lo necesita) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-3gJwYp8gC5cH2Z8t8w7f0J9p4cY1k2V8oX9X9p0Q0k1b0b7k0FJ1q8u0wZ5g0C9sZg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <!-- Turn.js v4 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js" integrity="sha512-Kc9qv8xv0y0QpY4m0o8Z7G6gJwqkq9bX2a5kQZJm1o0g9WZQvZ9n6V2m3nYq3s5z0n9yJp8w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
   <div id="flipbook">
-    <div class="page"><img src="Imagenes/Boletin1"></div>
-    <div class="page"><img src="Imagenes/Boletin2"></div>
-    <div class="page"><img src="Imagenes/Boletin3"></div>
-    <div class="page"><img src="Imagenes/Boletin4"></div>
-    <!-- agrega todas las páginas que tengas -->
+    <div class="page"><img src="Imagenes/Boletin1.jpg" alt=""></div>
+    <div class="page"><img src="Imagenes/Boletin2.jpg" alt=""></div>
+    <div class="page"><img src="Imagenes/Boletin3.jpg" alt=""></div>
+    <div class="page"><img src="Imagenes/Boletin4.jpg" alt=""></div>
   </div>
 
   <script>
-    $(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+      if (!window.jQuery || !jQuery().turn) {
+        console.error('Turn.js no cargó. Revisa el CDN o la conexión.');
+        return;
+      }
+
+      const el = document.getElementById('flipbook');
       $('#flipbook').turn({
-        width: document.getElementById('flipbook').clientWidth,
-        height: document.getElementById('flipbook').clientHeight,
+        width: el.clientWidth,
+        height: el.clientHeight,
         autoCenter: true,
         display: 'double',
         gradients: true,
         elevation: 50
+      });
+
+      // Reajustar al cambiar tamaño de ventana
+      window.addEventListener('resize', () => {
+        $('#flipbook').turn('size', el.clientWidth, el.clientHeight);
       });
     });
   </script>
