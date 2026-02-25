@@ -90,6 +90,8 @@
   background: #000;
   box-shadow: inset 0 0 0 6px rgba(255,255,255,0.08);
 } 
+    #flipbook.single-cover .page-wrapper:first-child {
+  visibility: hidden;
   </style>
 
   <!-- jQuery -->
@@ -142,20 +144,24 @@ $('#flipbook').on('turned', function () {
   playFlipSound();
 });
       function start() {
-        $('#flipbook').turn({
-          width: el.clientWidth,
-          height: el.clientHeight,
-          autoCenter: true,
-          display: 'single',   // portada centrada
-          gradients: true,
-          elevation: 50
+      $('#flipbook').turn({
+       width: el.clientWidth,
+       height: el.clientHeight,
+       autoCenter: true,
+       display: 'double',
+       gradients: true,
+       elevation: 50
         });
 
-        // desde la página 2, doble página
-        $('#flipbook').on('turning', function (e, page) {
-          const display = page > 1 ? 'double' : 'single';
-          $(this).turn('display', display);
-        });
+       // Portada centrada visualmente (pero motor en doble)
+$('#flipbook').on('turned', function (e, page) {
+  const fb = document.getElementById('flipbook');
+  if (page === 1) {
+    fb.classList.add('single-cover');
+  } else {
+    fb.classList.remove('single-cover');
+  }
+});
 
         // Flechas
         const fb = $('#flipbook');
@@ -224,6 +230,7 @@ document.querySelector('.nav.next').onclick = goNext;
 <audio id="flipSound" src="Audio/Sonido.mp3" preload="auto"></audio>
 </body>
 </html>
+
 
 
 
