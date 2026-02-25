@@ -35,11 +35,6 @@
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
 
-    /* 👇 SOLO ESTE CAMBIO PARA LA PORTADA */
-    #flipbook .page.cover {
-      background: #000;
-    }
-
     #flipbook img {
       width: 100%;
       height: 100%;
@@ -86,22 +81,25 @@
     }
   </style>
 
+  <!-- jQuery -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <!-- Turn.js -->
   <script src="libs/turn.min.js"></script>
 </head>
 <body>
 
   <div class="stage">
     <div id="flipbook">
-      <div class="page cover"><img src="Imagenes/Boletin1.jpg"></div>
+      <div class="page"><img src="Imagenes/Boletin1.jpg"></div>
       <div class="page"><img src="Imagenes/Boletin2.jpg"></div>
       <div class="page"><img src="Imagenes/Boletin3.jpg"></div>
       <div class="page"><img src="Imagenes/Boletin4.jpg"></div>
+      <!-- agrega más páginas aquí -->
     </div>
   </div>
 
-  <button class="nav prev">‹</button>
-  <button class="nav next">›</button>
+  <button class="nav prev" aria-label="Página anterior">‹</button>
+  <button class="nav next" aria-label="Página siguiente">›</button>
   <div class="hint">Arrastra la esquina de la página o usa ← →</div>
   <audio id="flipSound" src="Audio/Sonido.mp3" preload="auto"></audio>
 
@@ -112,13 +110,14 @@
       let loaded = 0;
 
       const flipSound = document.getElementById('flipSound');
-      flipSound.volume = 0.4;
+      if (flipSound) flipSound.volume = 0.4;
 
       function playSound() {
+        if (!flipSound) return;
         try {
           flipSound.currentTime = 0;
           flipSound.play();
-        } catch(e){}
+        } catch (e) {}
       }
 
       function start() {
@@ -128,17 +127,12 @@
           width: el.clientWidth,
           height: el.clientHeight,
           autoCenter: true,
-          display: 'single',
+          display: 'double',   // 🔥 TODO EN DOBLE DESDE EL INICIO
           gradients: true,
           elevation: 50
         });
 
-        fb.on('turning', function(e, page) {
-          const display = page > 1 ? 'double' : 'single';
-          fb.turn('display', display);
-        });
-
-        fb.on('turned', function() {
+        fb.on('turned', function () {
           playSound();
         });
 
