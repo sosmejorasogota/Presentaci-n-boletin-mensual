@@ -79,6 +79,10 @@
     @media (max-width: 640px) {
       .nav { width: 44px; height: 44px; font-size: 36px; }
     }
+    /* Ajuste visual para centrar la primera vista en modo double */
+#flipbook.center-first {
+  transform: translateX(-25%);
+}
   </style>
 
   <!-- jQuery -->
@@ -132,6 +136,24 @@
           elevation: 50
         });
 
+        // Centrar visualmente la primera vista
+function updateCentering() {
+  const page = fb.turn('page');
+  const elFlip = document.getElementById('flipbook');
+
+  if (page === 1 || page === 2) {
+    elFlip.classList.add('center-first');
+  } else {
+    elFlip.classList.remove('center-first');
+  }
+}
+
+// Al iniciar
+updateCentering();
+
+// Cada vez que cambias de página
+fb.on('turned', updateCentering);
+
         fb.on('turned', function () {
           playSound();
         });
@@ -170,6 +192,7 @@
 
 </body>
 </html>
+
 
 
 
