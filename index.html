@@ -44,8 +44,8 @@
       -webkit-user-drag: none;
     }
 
-    /* Página fantasma: el motor la cuenta, el usuario no la ve */
-    #flipbook .page.ghost {
+    /* Página fantasma: existe para Turn.js, no para el usuario */
+    #flipbook .ghost {
       visibility: hidden;
       pointer-events: none;
     }
@@ -97,22 +97,20 @@
   <div class="stage">
     <div id="flipbook">
 
-      <!-- Página fantasma (duplicado de la 1) -->
-      <div class="page ghost">
-        <img src="Imagenes/Boletin1.jpg" alt="">
-      </div>
+      <!-- Página fantasma -->
+      <div class="page ghost"></div>
 
       <!-- Páginas reales -->
       <div class="page"><img src="Imagenes/Boletin1.jpg" alt=""></div>
       <div class="page"><img src="Imagenes/Boletin2.jpg" alt=""></div>
       <div class="page"><img src="Imagenes/Boletin3.jpg" alt=""></div>
       <div class="page"><img src="Imagenes/Boletin4.jpg" alt=""></div>
-
+      <!-- agrega más si quieres -->
     </div>
   </div>
 
-  <button class="nav prev" aria-label="Página anterior">‹</button>
-  <button class="nav next" aria-label="Página siguiente">›</button>
+  <button class="nav prev">‹</button>
+  <button class="nav next">›</button>
   <div class="hint">Arrastra la esquina de la página o usa ← →</div>
 
   <audio id="flipSound" src="Audio/Sonido.mp3" preload="auto"></audio>
@@ -141,6 +139,9 @@
           elevation: 50
         });
 
+        // Fuerza iniciar en la doble página real (1–2)
+        fb.turn('page', 2);
+
         // Flechas
         document.querySelector('.nav.prev').onclick = () => fb.turn('previous');
         document.querySelector('.nav.next').onclick = () => fb.turn('next');
@@ -151,7 +152,7 @@
           if (e.key === 'ArrowRight') fb.turn('next');
         });
 
-        // Sonido al terminar de pasar página
+        // Sonido
         const flipSound = document.getElementById('flipSound');
         flipSound.volume = 0.4;
 
@@ -159,7 +160,7 @@
           try {
             flipSound.currentTime = 0;
             flipSound.play();
-          } catch (e) {}
+          } catch(e) {}
         });
 
         // Resize
