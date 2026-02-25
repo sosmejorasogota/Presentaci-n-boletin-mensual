@@ -6,67 +6,122 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
   <style>
-    body {
+    html, body {
+      width: 100%;
+      height: 100%;
       margin: 0;
       background: #111;
+      overflow: hidden; /* evitamos scroll externo */
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      overflow: hidden;
     }
+
+    .stage {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
     #flipbook {
-      width: 90vw;
-      height: 90vh;
+      width: min(95vw, 1200px);
+      height: min(95vh, 800px);
     }
+
     #flipbook .page {
       background: #fff;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
+
     #flipbook img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: contain; /* que se vea completa */
       user-select: none;
       -webkit-user-drag: none;
     }
+
+    /* Indicador de ayuda */
+    .hint {
+      position: fixed;
+      bottom: 12px;
+      color: #bbb;
+      font: 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      opacity: .8;
+    }
   </style>
 
-  <!-- jQuery (Turn.js lo necesita) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-3gJwYp8gC5cH2Z8t8w7f0J9p4cY1k2V8oX9X9p0Q0k1b0b7k0FJ1q8u0wZ5g0C9sZg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-  <!-- Turn.js v4 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js" integrity="sha512-Kc9qv8xv0y0QpY4m0o8Z7G6gJwqkq9bX2a5kQZJm1o0g9WZQvZ9n6V2m3nYq3s5z0n9yJp8w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- jQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Turn.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
-  <div id="flipbook">
-    <div class="page"><img src="Imagenes/Boletin1.jpg" alt=""></div>
-    <div class="page"><img src="Imagenes/Boletin2.jpg" alt=""></div>
-    <div class="page"><img src="Imagenes/Boletin3.jpg" alt=""></div>
-    <div class="page"><img src="Imagenes/Boletin4.jpg" alt=""></div>
+  <div class="stage">
+    <div id="flipbook">
+      <div class="page"><img src="Imagenes/Boletin1.jpg" alt=""></div>
+      <div class="page"><img src="Imagenes/Boletin2.jpg" alt=""></div>
+      <div class="page"><img src="Imagenes/Boletin3.jpg" alt=""></div>
+      <div class="page"><img src="Imagenes/Boletin4.jpg" alt=""></div>
+      <!-- agrega todas las páginas -->
+    </div>
   </div>
 
+  <div class="hint">Arrastra la esquina de la página o usa ← →</div>
+
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    function initFlipbook() {
+      const el = document.getElementById('flipbook');
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+
       if (!window.jQuery || !jQuery().turn) {
-        console.error('Turn.js no cargó. Revisa el CDN o la conexión.');
+        console.error('Turn.js no cargó.');
         return;
       }
 
-      const el = document.getElementById('flipbook');
-      $('#flipbook').turn({
-        width: el.clientWidth,
-        height: el.clientHeight,
-        autoCenter: true,
-        display: 'double',
-        gradients: true,
-        elevation: 50
+      // Espera a que carguen las imágenes para calcular bien tamaños
+      const imgs = el.querySelectorAll('img');
+      let loaded = 0;
+      imgs.forEach(img => {
+        if (img.complete) loaded++;
+        else img.onload = () => {
+          loaded++;
+          if (loaded === imgs.length) start();
+        };
       });
+      if (loaded === imgs.length) start();
 
-      // Reajustar al cambiar tamaño de ventana
-      window.addEventListener('resize', () => {
-        $('#flipbook').turn('size', el.clientWidth, el.clientHeight);
-      });
+      function start() {
+        $('#flipbook').turn({
+          width: w,
+          height: h,
+          autoCenter: true,
+          display: 'double',
+          gradients: true,
+          elevation: 50
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initFlipbook);
+
+    // Teclas ← →
+    document.addEventListener('keydown', (e) => {
+      if (!$('#flipbook').data('turn')) return;
+      if (e.key === 'ArrowLeft') $('#flipbook').turn('previous');
+      if (e.key === 'ArrowRight') $('#flipbook').turn('next');
+    });
+
+    // Recalcular en resize
+    window.addEventListener('resize', () => {
+      const fb = $('#flipbook');
+      if (!fb.data('turn')) return;
+      const el = document.getElementById('flipbook');
+      fb.turn('size', el.clientWidth, el.clientHeight);
     });
   </script>
 
