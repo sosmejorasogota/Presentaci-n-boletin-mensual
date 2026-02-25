@@ -73,58 +73,76 @@
   <div class="hint">Arrastra la esquina de la página o usa ← →</div>
 
   <script>
-    function initFlipbook() {
-      const el = document.getElementById('flipbook');
-      const w = el.clientWidth;
-      const h = el.clientHeight;
+   function initFlipbook() {
+    const el = document.getElementById('flipbook');
 
-      if (!window.jQuery || !jQuery().turn) {
-        console.error('Turn.js no cargó.');
-        return;
-      }
+    if (!window.jQuery || !jQuery().turn) {
+      console.error('Turn.js no cargó.');
+      return;
+    }
 
-      // Espera a que carguen las imágenes para calcular bien tamaños
-      const imgs = el.querySelectorAll('img');
-      let loaded = 0;
-      imgs.forEach(img => {
-        if (img.complete) loaded++;
-        else img.onload = () => {
+    // Espera a que carguen las imágenes para calcular bien tamaños
+    const imgs = el.querySelectorAll('img');
+    let loaded = 0;
+
+    function start() {
+      $('#flipbook').turn({
+        width: el.clientWidth,
+        height: el.clientHeight,
+        autoCenter: true,
+        display: 'single',   // 👈 portada centrada
+        gradients: true,
+        elevation: 50
+      });
+
+      // A partir de la página 2, usar doble página
+      $('#flipbook').bind('turning', function (e, page) {
+        const display = page > 1 ? 'double' : 'single';
+        $(this).turn('display', display);
+      });
+    }
+
+    if (!imgs.length) {
+      start();
+      return;
+    }
+
+    imgs.forEach(img => {
+      if (img.complete) {
+        loaded++;
+        if (loaded === imgs.length) start();
+      } else {
+        img.onload = () => {
           loaded++;
           if (loaded === imgs.length) start();
         };
-      });
-      if (loaded === imgs.length) start();
-
-      function start() {
-        $('#flipbook').turn({
-          width: w,
-          height: h,
-          autoCenter: true,
-          display: 'double',
-          gradients: true,
-          elevation: 50
-        });
+        img.onerror = () => {
+          loaded++;
+          if (loaded === imgs.length) start();
+        };
       }
-    }
-
-    document.addEventListener('DOMContentLoaded', initFlipbook);
-
-    // Teclas ← →
-    document.addEventListener('keydown', (e) => {
-      if (!$('#flipbook').data('turn')) return;
-      if (e.key === 'ArrowLeft') $('#flipbook').turn('previous');
-      if (e.key === 'ArrowRight') $('#flipbook').turn('next');
     });
+  }
 
-    // Recalcular en resize
-    window.addEventListener('resize', () => {
-      const fb = $('#flipbook');
-      if (!fb.data('turn')) return;
-      const el = document.getElementById('flipbook');
-      fb.turn('size', el.clientWidth, el.clientHeight);
-    });
+  document.addEventListener('DOMContentLoaded', initFlipbook);
+
+  // Teclas ← →
+  document.addEventListener('keydown', (e) => {
+    if (!$('#flipbook').data('turn')) return;
+    if (e.key === 'ArrowLeft') $('#flipbook').turn('previous');
+    if (e.key === 'ArrowRight') $('#flipbook').turn('next');
+  });
+
+  // Resize responsive
+  window.addEventListener('resize', () => {
+    const fb = $('#flipbook');
+    if (!fb.data('turn')) return;
+    const el = document.getElementById('flipbook');
+    fb.turn('size', el.clientWidth, el.clientHeight);
+  });
   </script>
 
 </body>
 </html>
+
 
