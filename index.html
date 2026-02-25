@@ -35,15 +35,9 @@
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
 
-    /* Página fantasma (izquierda de la portada) */
-    #flipbook .page.ghost {
-      background: #000;
-    }
-
-    /* Portada */
+    /* 👇 SOLO ESTE CAMBIO PARA LA PORTADA */
     #flipbook .page.cover {
       background: #000;
-      box-shadow: inset 0 0 0 6px rgba(255,255,255,0.08);
     }
 
     #flipbook img {
@@ -81,6 +75,7 @@
       user-select: none;
       transition: background .2s ease, transform .1s ease;
     }
+
     .nav:hover { background: rgba(0,0,0,.8); }
     .nav:active { transform: translateY(-50%) scale(0.95); }
     .nav.prev { left: 16px; }
@@ -91,55 +86,39 @@
     }
   </style>
 
-  <!-- jQuery -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <!-- Turn.js local -->
   <script src="libs/turn.min.js"></script>
 </head>
 <body>
 
   <div class="stage">
     <div id="flipbook">
-      <!-- Página fantasma (izquierda de la portada) -->
-      <div class="page ghost"></div>
-
-      <!-- Portada -->
-      <div class="page cover"><img src="Imagenes/Boletin1.jpg" alt=""></div>
-
-      <!-- Páginas reales -->
-      <div class="page"><img src="Imagenes/Boletin2.jpg" alt=""></div>
-      <div class="page"><img src="Imagenes/Boletin3.jpg" alt=""></div>
-      <div class="page"><img src="Imagenes/Boletin4.jpg" alt=""></div>
+      <div class="page cover"><img src="Imagenes/Boletin1.jpg"></div>
+      <div class="page"><img src="Imagenes/Boletin2.jpg"></div>
+      <div class="page"><img src="Imagenes/Boletin3.jpg"></div>
+      <div class="page"><img src="Imagenes/Boletin4.jpg"></div>
     </div>
   </div>
 
-  <button class="nav prev" aria-label="Página anterior">‹</button>
-  <button class="nav next" aria-label="Página siguiente">›</button>
+  <button class="nav prev">‹</button>
+  <button class="nav next">›</button>
   <div class="hint">Arrastra la esquina de la página o usa ← →</div>
-
   <audio id="flipSound" src="Audio/Sonido.mp3" preload="auto"></audio>
 
   <script>
     function initFlipbook() {
       const el = document.getElementById('flipbook');
-
-      if (!window.jQuery || !jQuery().turn) {
-        console.error('Turn.js no cargó.');
-        return;
-      }
-
       const imgs = el.querySelectorAll('img');
       let loaded = 0;
 
       const flipSound = document.getElementById('flipSound');
-      if (flipSound) flipSound.volume = 0.4;
+      flipSound.volume = 0.4;
 
-      function playFlipSound() {
-        if (!flipSound) return;
+      function playSound() {
         try {
           flipSound.currentTime = 0;
           flipSound.play();
-        } catch (e) {}
+        } catch(e){}
       }
 
       function start() {
@@ -149,27 +128,23 @@
           width: el.clientWidth,
           height: el.clientHeight,
           autoCenter: true,
-          display: 'double',
+          display: 'single',
           gradients: true,
           elevation: 50
         });
 
-        // Evitar que el usuario se quede en la página fantasma
         fb.on('turning', function(e, page) {
-          if (page === 1) e.preventDefault();
+          const display = page > 1 ? 'double' : 'single';
+          fb.turn('display', display);
         });
 
-        // Sonido al pasar página
-        fb.on('turned', function () {
-          playFlipSound();
+        fb.on('turned', function() {
+          playSound();
         });
 
-        // Flechas
         document.querySelector('.nav.prev').onclick = () => fb.turn('previous');
         document.querySelector('.nav.next').onclick = () => fb.turn('next');
       }
-
-      if (!imgs.length) return start();
 
       imgs.forEach(img => {
         if (img.complete) {
@@ -201,5 +176,6 @@
 
 </body>
 </html>
+
 
 
