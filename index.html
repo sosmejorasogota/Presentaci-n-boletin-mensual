@@ -141,6 +141,13 @@
 
         // Fuerza iniciar en la doble página real (1–2)
         fb.turn('page', 2);
+        // Bloquear navegación a la página fantasma (1)
+        fb.on('turning', function (e, page) {
+        if (page === 1) {
+          e.preventDefault();
+        fb.turn('page', 2);
+  }
+});
 
         // Flechas
         document.querySelector('.nav.prev').onclick = () => fb.turn('previous');
@@ -187,3 +194,4 @@
 
 </body>
 </html>
+
