@@ -35,6 +35,11 @@
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
 
+    /* Página fantasma (izquierda de la portada) */
+    #flipbook .page.ghost {
+      background: #000;
+    }
+
     /* Portada */
     #flipbook .page.cover {
       background: #000;
@@ -47,11 +52,6 @@
       object-fit: contain;
       user-select: none;
       -webkit-user-drag: none;
-    }
-
-    /* Ocultar página izquierda SOLO en portada */
-    #flipbook.single-cover .page-wrapper:first-child {
-      visibility: hidden;
     }
 
     .hint {
@@ -81,7 +81,6 @@
       user-select: none;
       transition: background .2s ease, transform .1s ease;
     }
-
     .nav:hover { background: rgba(0,0,0,.8); }
     .nav:active { transform: translateY(-50%) scale(0.95); }
     .nav.prev { left: 16px; }
@@ -101,7 +100,13 @@
 
   <div class="stage">
     <div id="flipbook">
+      <!-- Página fantasma (izquierda de la portada) -->
+      <div class="page ghost"></div>
+
+      <!-- Portada -->
       <div class="page cover"><img src="Imagenes/Boletin1.jpg" alt=""></div>
+
+      <!-- Páginas reales -->
       <div class="page"><img src="Imagenes/Boletin2.jpg" alt=""></div>
       <div class="page"><img src="Imagenes/Boletin3.jpg" alt=""></div>
       <div class="page"><img src="Imagenes/Boletin4.jpg" alt=""></div>
@@ -149,18 +154,14 @@
           elevation: 50
         });
 
+        // Evitar que el usuario se quede en la página fantasma
+        fb.on('turning', function(e, page) {
+          if (page === 1) e.preventDefault();
+        });
+
         // Sonido al pasar página
         fb.on('turned', function () {
           playFlipSound();
-        });
-
-        // Portada centrada visualmente
-        fb.on('turned', function (e, page) {
-          if (page === 1) {
-            el.classList.add('single-cover');
-          } else {
-            el.classList.remove('single-cover');
-          }
         });
 
         // Flechas
@@ -200,8 +201,5 @@
 
 </body>
 </html>
-
-
-
 
 
