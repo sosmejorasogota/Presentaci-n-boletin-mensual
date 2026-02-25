@@ -129,12 +129,37 @@
         });
 
         // Flechas
-        document.querySelector('.nav.prev').addEventListener('click', () => {
-          $('#flipbook').turn('previous');
-        });
-        document.querySelector('.nav.next').addEventListener('click', () => {
-          $('#flipbook').turn('next');
-        });
+        const fb = $('#flipbook');
+
+function goNext() {
+  const page = fb.turn('page');
+
+  // Si estás en portada, cambia a doble y pasa en el mismo clic
+  if (page === 1) {
+    fb.turn('display', 'double');
+    fb.turn('next');  // animación normal
+    return;
+  }
+
+  fb.turn('next');
+}
+
+function goPrev() {
+  const page = fb.turn('page');
+
+  // Si vuelves a portada, vuelve a single antes de girar
+  if (page === 2) {
+    fb.turn('display', 'single');
+    fb.turn('previous');
+    return;
+  }
+
+  fb.turn('previous');
+}
+
+// Limpia posibles listeners anteriores (por si recargaste varias veces)
+document.querySelector('.nav.prev').onclick = goPrev;
+document.querySelector('.nav.next').onclick = goNext;
       }
 
       if (!imgs.length) return start();
@@ -170,3 +195,4 @@
 
 </body>
 </html>
+
