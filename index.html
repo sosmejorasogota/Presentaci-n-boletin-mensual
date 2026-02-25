@@ -15,6 +15,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
 
     .stage {
@@ -26,8 +27,8 @@
     }
 
     #flipbook {
-      width: 98vw;
-      height: 98vh;
+      width: 96vw;
+      height: 96vh;
     }
 
     #flipbook .page {
@@ -43,12 +44,18 @@
       -webkit-user-drag: none;
     }
 
+    /* Página fantasma: el motor la cuenta, el usuario no la ve */
+    #flipbook .page.ghost {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
     .hint {
       position: fixed;
       bottom: 12px;
       color: #bbb;
-      font: 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      opacity: .8;
+      font-size: 12px;
+      opacity: .7;
       z-index: 5;
     }
 
@@ -59,7 +66,7 @@
       background: rgba(0,0,0,.55);
       color: #fff;
       border: none;
-      font-size: 48px;
+      font-size: 42px;
       width: 56px;
       height: 56px;
       border-radius: 50%;
@@ -70,59 +77,57 @@
       user-select: none;
       transition: background .2s ease, transform .1s ease;
     }
-
-    .nav:hover { background: rgba(0,0,0,.8); }
+    .nav:hover { background: rgba(0,0,0,.85); }
     .nav:active { transform: translateY(-50%) scale(0.95); }
     .nav.prev { left: 16px; }
     .nav.next { right: 16px; }
 
     @media (max-width: 640px) {
-      .nav { width: 44px; height: 44px; font-size: 36px; }
+      .nav { width: 44px; height: 44px; font-size: 34px; }
     }
-    /* Ajuste visual para centrar la primera vista en modo double */
-#flipbook.center-first {
-  transform: translateX(-25%);
-}
   </style>
 
   <!-- jQuery -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <!-- Turn.js -->
+  <!-- Turn.js local -->
   <script src="libs/turn.min.js"></script>
 </head>
 <body>
 
   <div class="stage">
     <div id="flipbook">
-      <div class="page"><img src="Imagenes/Boletin1.jpg"></div>
-      <div class="page"><img src="Imagenes/Boletin2.jpg"></div>
-      <div class="page"><img src="Imagenes/Boletin3.jpg"></div>
-      <div class="page"><img src="Imagenes/Boletin4.jpg"></div>
-      <!-- agrega más páginas aquí -->
+
+      <!-- Página fantasma (duplicado de la 1) -->
+      <div class="page ghost">
+        <img src="Imagenes/Boletin1.jpg" alt="">
+      </div>
+
+      <!-- Páginas reales -->
+      <div class="page"><img src="Imagenes/Boletin1.jpg" alt=""></div>
+      <div class="page"><img src="Imagenes/Boletin2.jpg" alt=""></div>
+      <div class="page"><img src="Imagenes/Boletin3.jpg" alt=""></div>
+      <div class="page"><img src="Imagenes/Boletin4.jpg" alt=""></div>
+
     </div>
   </div>
 
   <button class="nav prev" aria-label="Página anterior">‹</button>
   <button class="nav next" aria-label="Página siguiente">›</button>
   <div class="hint">Arrastra la esquina de la página o usa ← →</div>
+
   <audio id="flipSound" src="Audio/Sonido.mp3" preload="auto"></audio>
 
   <script>
     function initFlipbook() {
       const el = document.getElementById('flipbook');
+
+      if (!window.jQuery || !jQuery().turn) {
+        console.error('Turn.js no cargó');
+        return;
+      }
+
       const imgs = el.querySelectorAll('img');
       let loaded = 0;
-
-      const flipSound = document.getElementById('flipSound');
-      if (flipSound) flipSound.volume = 0.4;
-
-      function playSound() {
-        if (!flipSound) return;
-        try {
-          flipSound.currentTime = 0;
-          flipSound.play();
-        } catch (e) {}
-      }
 
       function start() {
         const fb = $('#flipbook');
@@ -131,36 +136,39 @@
           width: el.clientWidth,
           height: el.clientHeight,
           autoCenter: true,
-          display: 'double',   // 🔥 TODO EN DOBLE DESDE EL INICIO
+          display: 'double',
           gradients: true,
           elevation: 50
         });
 
-        // Centrar visualmente la primera vista
-function updateCentering() {
-  const page = fb.turn('page');
-  const elFlip = document.getElementById('flipbook');
-
-  if (page === 1 || page === 2) {
-    elFlip.classList.add('center-first');
-  } else {
-    elFlip.classList.remove('center-first');
-  }
-}
-
-// Al iniciar
-updateCentering();
-
-// Cada vez que cambias de página
-fb.on('turned', updateCentering);
-
-        fb.on('turned', function () {
-          playSound();
-        });
-
+        // Flechas
         document.querySelector('.nav.prev').onclick = () => fb.turn('previous');
         document.querySelector('.nav.next').onclick = () => fb.turn('next');
+
+        // Teclas
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowLeft') fb.turn('previous');
+          if (e.key === 'ArrowRight') fb.turn('next');
+        });
+
+        // Sonido al terminar de pasar página
+        const flipSound = document.getElementById('flipSound');
+        flipSound.volume = 0.4;
+
+        fb.on('turned', function () {
+          try {
+            flipSound.currentTime = 0;
+            flipSound.play();
+          } catch (e) {}
+        });
+
+        // Resize
+        window.addEventListener('resize', () => {
+          fb.turn('size', el.clientWidth, el.clientHeight);
+        });
       }
+
+      if (!imgs.length) return start();
 
       imgs.forEach(img => {
         if (img.complete) {
@@ -174,25 +182,7 @@ fb.on('turned', updateCentering);
     }
 
     document.addEventListener('DOMContentLoaded', initFlipbook);
-
-    document.addEventListener('keydown', (e) => {
-      const fb = $('#flipbook');
-      if (!fb.data('turn')) return;
-      if (e.key === 'ArrowLeft') fb.turn('previous');
-      if (e.key === 'ArrowRight') fb.turn('next');
-    });
-
-    window.addEventListener('resize', () => {
-      const fb = $('#flipbook');
-      if (!fb.data('turn')) return;
-      const el = document.getElementById('flipbook');
-      fb.turn('size', el.clientWidth, el.clientHeight);
-    });
   </script>
 
 </body>
 </html>
-
-
-
-
