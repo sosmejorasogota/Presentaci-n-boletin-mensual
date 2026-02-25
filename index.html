@@ -111,7 +111,22 @@
 
       const imgs = el.querySelectorAll('img');
       let loaded = 0;
+const flipSound = document.getElementById('flipSound');
 
+function playFlipSound() {
+  if (!flipSound) return;
+  try {
+    flipSound.currentTime = 0;
+    flipSound.play();
+  } catch (e) {
+    // Algunos navegadores bloquean audio hasta interacción del usuario
+  }
+}
+
+// Sonar cuando termina de girar una página (mejor UX)
+$('#flipbook').on('turned', function () {
+  playFlipSound();
+});
       function start() {
         $('#flipbook').turn({
           width: el.clientWidth,
@@ -192,7 +207,8 @@ document.querySelector('.nav.next').onclick = goNext;
       fb.turn('size', el.clientWidth, el.clientHeight);
     });
   </script>
-
+<audio id="flipSound" src="Audio/Sonido.mp3" preload="auto"></audio>
 </body>
 </html>
+
 
