@@ -110,7 +110,8 @@
   <div class="hint">Arrastra la esquina de la página o usa ← →</div>
 
   <script>
-   function initFlipbook() {
+  <script>
+  function initFlipbook() {
     const el = document.getElementById('flipbook');
 
     if (!window.jQuery || !jQuery().turn) {
@@ -118,7 +119,6 @@
       return;
     }
 
-    // Espera a que carguen las imágenes para calcular bien tamaños
     const imgs = el.querySelectorAll('img');
     let loaded = 0;
 
@@ -127,15 +127,23 @@
         width: el.clientWidth,
         height: el.clientHeight,
         autoCenter: true,
-        display: 'single',   // 👈 portada centrada
+        display: 'single',
         gradients: true,
         elevation: 50
       });
 
-      // A partir de la página 2, usar doble página
+      // Cambia a doble página desde la 2
       $('#flipbook').bind('turning', function (e, page) {
         const display = page > 1 ? 'double' : 'single';
         $(this).turn('display', display);
+      });
+
+      // 👇 AQUÍ enganchamos las flechas (cuando Turn.js ya existe)
+      document.querySelector('.nav.prev')?.addEventListener('click', function () {
+        $('#flipbook').turn('previous');
+      });
+      document.querySelector('.nav.next')?.addEventListener('click', function () {
+        $('#flipbook').turn('next');
       });
     }
 
@@ -170,29 +178,20 @@
     if (e.key === 'ArrowRight') $('#flipbook').turn('next');
   });
 
-  // Resize responsive
+  // Resize
   window.addEventListener('resize', () => {
     const fb = $('#flipbook');
     if (!fb.data('turn')) return;
     const el = document.getElementById('flipbook');
     fb.turn('size', el.clientWidth, el.clientHeight);
   });
-     // Navegación por flechas (click)
-  document.addEventListener('click', function (e) {
-    if (!$('#flipbook').data('turn')) return;
-
-    if (e.target.closest('.nav.prev')) {
-      $('#flipbook').turn('previous');
-    }
-
-    if (e.target.closest('.nav.next')) {
-      $('#flipbook').turn('next');
-    }
-  });
+</script>
+ 
   </script>
 
 </body>
 </html>
+
 
 
 
