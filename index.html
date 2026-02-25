@@ -11,7 +11,7 @@
       height: 100%;
       margin: 0;
       background: #111;
-      overflow: hidden; /* evitamos scroll externo */
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -38,58 +38,51 @@
     #flipbook img {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* que se vea completa */
+      object-fit: contain;
       user-select: none;
       -webkit-user-drag: none;
     }
 
-    /* Indicador de ayuda */
     .hint {
       position: fixed;
       bottom: 12px;
       color: #bbb;
       font: 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       opacity: .8;
+      z-index: 5;
     }
+
     .nav {
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,.55);
-  color: #fff;
-  border: none;
-  font-size: 48px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 10;
-  display: grid;
-  place-items: center;
-  user-select: none;
-  transition: background .2s ease, transform .1s ease;
-}
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      border: none;
+      font-size: 48px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      user-select: none;
+      transition: background .2s ease, transform .1s ease;
+    }
+    .nav:hover { background: rgba(0,0,0,.8); }
+    .nav:active { transform: translateY(-50%) scale(0.95); }
+    .nav.prev { left: 16px; }
+    .nav.next { right: 16px; }
 
-.nav:hover {
-  background: rgba(0,0,0,.8);
-}
-
-.nav:active {
-  transform: translateY(-50%) scale(0.95);
-}
-
-.nav.prev { left: 16px; }
-.nav.next { right: 16px; }
-
-/* Opcional: ocultar flechas en pantallas muy pequeñas */
-@media (max-width: 640px) {
-  .nav { width: 44px; height: 44px; font-size: 36px; }
-}
+    @media (max-width: 640px) {
+      .nav { width: 44px; height: 44px; font-size: 36px; }
+    }
   </style>
 
   <!-- jQuery -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <!-- Turn.js -->
+  <!-- Turn.js local -->
   <script src="libs/turn.min.js"></script>
 </head>
 <body>
@@ -100,100 +93,80 @@
       <div class="page"><img src="Imagenes/Boletin2.jpg" alt=""></div>
       <div class="page"><img src="Imagenes/Boletin3.jpg" alt=""></div>
       <div class="page"><img src="Imagenes/Boletin4.jpg" alt=""></div>
-      <!-- agrega todas las páginas -->
     </div>
   </div>
-  
-<button class="nav prev" aria-label="Página anterior">‹</button>
-<button class="nav next" aria-label="Página siguiente">›</button>
-  
+
+  <button class="nav prev" aria-label="Página anterior">‹</button>
+  <button class="nav next" aria-label="Página siguiente">›</button>
   <div class="hint">Arrastra la esquina de la página o usa ← →</div>
 
-
   <script>
-  function initFlipbook() {
-    const el = document.getElementById('flipbook');
+    function initFlipbook() {
+      const el = document.getElementById('flipbook');
 
-    if (!window.jQuery || !jQuery().turn) {
-      console.error('Turn.js no cargó.');
-      return;
-    }
-
-    const imgs = el.querySelectorAll('img');
-    let loaded = 0;
-
-    function start() {
-      $('#flipbook').turn({
-        width: el.clientWidth,
-        height: el.clientHeight,
-        autoCenter: true,
-        display: 'single',
-        gradients: true,
-        elevation: 50
-      });
-
-      // Cambia a doble página desde la 2
-      $('#flipbook').bind('turning', function (e, page) {
-        const display = page > 1 ? 'double' : 'single';
-        $(this).turn('display', display);
-      });
-
-      // 👇 AQUÍ enganchamos las flechas (cuando Turn.js ya existe)
-      document.querySelector('.nav.prev')?.addEventListener('click', function () {
-        $('#flipbook').turn('previous');
-      });
-      document.querySelector('.nav.next')?.addEventListener('click', function () {
-        $('#flipbook').turn('next');
-      });
-    }
-
-    if (!imgs.length) {
-      start();
-      return;
-    }
-
-    imgs.forEach(img => {
-      if (img.complete) {
-        loaded++;
-        if (loaded === imgs.length) start();
-      } else {
-        img.onload = () => {
-          loaded++;
-          if (loaded === imgs.length) start();
-        };
-        img.onerror = () => {
-          loaded++;
-          if (loaded === imgs.length) start();
-        };
+      if (!window.jQuery || !jQuery().turn) {
+        console.error('Turn.js no cargó.');
+        return;
       }
+
+      const imgs = el.querySelectorAll('img');
+      let loaded = 0;
+
+      function start() {
+        $('#flipbook').turn({
+          width: el.clientWidth,
+          height: el.clientHeight,
+          autoCenter: true,
+          display: 'single',   // portada centrada
+          gradients: true,
+          elevation: 50
+        });
+
+        // desde la página 2, doble página
+        $('#flipbook').on('turning', function (e, page) {
+          const display = page > 1 ? 'double' : 'single';
+          $(this).turn('display', display);
+        });
+
+        // Flechas
+        document.querySelector('.nav.prev').addEventListener('click', () => {
+          $('#flipbook').turn('previous');
+        });
+        document.querySelector('.nav.next').addEventListener('click', () => {
+          $('#flipbook').turn('next');
+        });
+      }
+
+      if (!imgs.length) return start();
+
+      imgs.forEach(img => {
+        if (img.complete) {
+          loaded++;
+          if (loaded === imgs.length) start();
+        } else {
+          img.onload = () => { loaded++; if (loaded === imgs.length) start(); };
+          img.onerror = () => { loaded++; if (loaded === imgs.length) start(); };
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initFlipbook);
+
+    // Teclas
+    document.addEventListener('keydown', (e) => {
+      if (!$('#flipbook').data('turn')) return;
+      if (e.key === 'ArrowLeft') $('#flipbook').turn('previous');
+      if (e.key === 'ArrowRight') $('#flipbook').turn('next');
     });
-  }
 
-  document.addEventListener('DOMContentLoaded', initFlipbook);
-
-  // Teclas ← →
-  document.addEventListener('keydown', (e) => {
-    if (!$('#flipbook').data('turn')) return;
-    if (e.key === 'ArrowLeft') $('#flipbook').turn('previous');
-    if (e.key === 'ArrowRight') $('#flipbook').turn('next');
-  });
-
-  // Resize
-  window.addEventListener('resize', () => {
-    const fb = $('#flipbook');
-    if (!fb.data('turn')) return;
-    const el = document.getElementById('flipbook');
-    fb.turn('size', el.clientWidth, el.clientHeight);
-  });
-</script>
- 
-
+    // Resize
+    window.addEventListener('resize', () => {
+      const fb = $('#flipbook');
+      if (!fb.data('turn')) return;
+      const el = document.getElementById('flipbook');
+      fb.turn('size', el.clientWidth, el.clientHeight);
+    });
+  </script>
 
 </body>
 </html>
-
-
-
-
-
-
