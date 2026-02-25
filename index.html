@@ -35,12 +35,23 @@
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
 
+    /* Portada */
+    #flipbook .page.cover {
+      background: #000;
+      box-shadow: inset 0 0 0 6px rgba(255,255,255,0.08);
+    }
+
     #flipbook img {
       width: 100%;
       height: 100%;
       object-fit: contain;
       user-select: none;
       -webkit-user-drag: none;
+    }
+
+    /* Ocultar página izquierda SOLO en portada */
+    #flipbook.single-cover .page-wrapper:first-child {
+      visibility: hidden;
     }
 
     .hint {
@@ -70,6 +81,7 @@
       user-select: none;
       transition: background .2s ease, transform .1s ease;
     }
+
     .nav:hover { background: rgba(0,0,0,.8); }
     .nav:active { transform: translateY(-50%) scale(0.95); }
     .nav.prev { left: 16px; }
@@ -78,24 +90,10 @@
     @media (max-width: 640px) {
       .nav { width: 44px; height: 44px; font-size: 36px; }
     }
-    #flipbook .page.cover {
-  background: #000;
-}
-
-/* Centrar la portada si quieres que “flote” mejor */
-#flipbook .page.cover img {
-  object-fit: contain;
-}
-   #flipbook .page.cover {
-  background: #000;
-  box-shadow: inset 0 0 0 6px rgba(255,255,255,0.08);
-} 
-    #flipbook.single-cover .page-wrapper:first-child {
-  visibility: hidden;
   </style>
 
   <!-- jQuery -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <!-- Turn.js local -->
   <script src="libs/turn.min.js"></script>
 </head>
@@ -114,6 +112,8 @@
   <button class="nav next" aria-label="Página siguiente">›</button>
   <div class="hint">Arrastra la esquina de la página o usa ← →</div>
 
+  <audio id="flipSound" src="Audio/Sonido.mp3" preload="auto"></audio>
+
   <script>
     function initFlipbook() {
       const el = document.getElementById('flipbook');
@@ -125,76 +125,47 @@
 
       const imgs = el.querySelectorAll('img');
       let loaded = 0;
-const flipSound = document.getElementById('flipSound');
 
- flipSound.volume = 0.4; // 0.0 a 1.0
+      const flipSound = document.getElementById('flipSound');
+      if (flipSound) flipSound.volume = 0.4;
 
-function playFlipSound() {
-  if (!flipSound) return;
-  try {
-    flipSound.currentTime = 0;
-    flipSound.play();
-  } catch (e) {
-    // Algunos navegadores bloquean audio hasta interacción del usuario
-  }
-}
+      function playFlipSound() {
+        if (!flipSound) return;
+        try {
+          flipSound.currentTime = 0;
+          flipSound.play();
+        } catch (e) {}
+      }
 
-// Sonar cuando termina de girar una página (mejor UX)
-$('#flipbook').on('turned', function () {
-  playFlipSound();
-});
       function start() {
-      $('#flipbook').turn({
-       width: el.clientWidth,
-       height: el.clientHeight,
-       autoCenter: true,
-       display: 'double',
-       gradients: true,
-       elevation: 50
-        });
-
-       // Portada centrada visualmente (pero motor en doble)
-$('#flipbook').on('turned', function (e, page) {
-  const fb = document.getElementById('flipbook');
-  if (page === 1) {
-    fb.classList.add('single-cover');
-  } else {
-    fb.classList.remove('single-cover');
-  }
-});
-
-        // Flechas
         const fb = $('#flipbook');
 
-function goNext() {
-  const page = fb.turn('page');
+        fb.turn({
+          width: el.clientWidth,
+          height: el.clientHeight,
+          autoCenter: true,
+          display: 'double',
+          gradients: true,
+          elevation: 50
+        });
 
-  // Si estás en portada, cambia a doble y pasa en el mismo clic
-  if (page === 1) {
-    fb.turn('display', 'double');
-    fb.turn('next');  // animación normal
-    return;
-  }
+        // Sonido al pasar página
+        fb.on('turned', function () {
+          playFlipSound();
+        });
 
-  fb.turn('next');
-}
+        // Portada centrada visualmente
+        fb.on('turned', function (e, page) {
+          if (page === 1) {
+            el.classList.add('single-cover');
+          } else {
+            el.classList.remove('single-cover');
+          }
+        });
 
-function goPrev() {
-  const page = fb.turn('page');
-
-  // Si vuelves a portada, vuelve a single antes de girar
-  if (page === 2) {
-    fb.turn('display', 'single');
-    fb.turn('previous');
-    return;
-  }
-
-  fb.turn('previous');
-}
-
-// Limpia posibles listeners anteriores (por si recargaste varias veces)
-document.querySelector('.nav.prev').onclick = goPrev;
-document.querySelector('.nav.next').onclick = goNext;
+        // Flechas
+        document.querySelector('.nav.prev').onclick = () => fb.turn('previous');
+        document.querySelector('.nav.next').onclick = () => fb.turn('next');
       }
 
       if (!imgs.length) return start();
@@ -212,14 +183,13 @@ document.querySelector('.nav.next').onclick = goNext;
 
     document.addEventListener('DOMContentLoaded', initFlipbook);
 
-    // Teclas
     document.addEventListener('keydown', (e) => {
-      if (!$('#flipbook').data('turn')) return;
-      if (e.key === 'ArrowLeft') $('#flipbook').turn('previous');
-      if (e.key === 'ArrowRight') $('#flipbook').turn('next');
+      const fb = $('#flipbook');
+      if (!fb.data('turn')) return;
+      if (e.key === 'ArrowLeft') fb.turn('previous');
+      if (e.key === 'ArrowRight') fb.turn('next');
     });
 
-    // Resize
     window.addEventListener('resize', () => {
       const fb = $('#flipbook');
       if (!fb.data('turn')) return;
@@ -227,7 +197,7 @@ document.querySelector('.nav.next').onclick = goNext;
       fb.turn('size', el.clientWidth, el.clientHeight);
     });
   </script>
-<audio id="flipSound" src="Audio/Sonido.mp3" preload="auto"></audio>
+
 </body>
 </html>
 
